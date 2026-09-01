@@ -4,7 +4,7 @@ import { logoutAction } from '../login/actions';
 import Link from 'next/link';
 import { 
   LayoutDashboard, Users, Building2, Briefcase, 
-  Clock, CalendarX2, Laptop, LogOut, FileText, Download
+  Clock, CalendarX2, Laptop, LogOut, FileText, Download, Fingerprint
 } from 'lucide-react';
 
 export default async function DashboardLayout({
@@ -24,6 +24,7 @@ export default async function DashboardLayout({
     { name: 'Departemen', href: '/departments', icon: Building2 },
     { name: 'Jabatan', href: '/positions', icon: Briefcase },
     { name: 'Shift & Jadwal', href: '/schedules', icon: Clock },
+    { name: 'Log Mentah', href: '/raw-scans', icon: Fingerprint },
     { name: 'Cuti & Libur', href: '/leaves', icon: CalendarX2 },
     { name: 'Mesin & Sumber', href: '/devices', icon: Laptop },
     { name: 'Laporan', href: '/reports', icon: FileText },
@@ -61,7 +62,6 @@ export default async function DashboardLayout({
         <div className="p-4 bg-slate-950">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-8 h-8 rounded-full bg-red-700 flex items-center justify-center text-white font-bold text-sm">
-              {/* Penambahan fallback untuk mencegah error null */}
               {session.user?.name?.charAt(0) || 'U'}
             </div>
             <div className="overflow-hidden">
