@@ -4,6 +4,7 @@
   "main": "./index.ts",
   "types": "./index.ts",
   "scripts": {
+    "build": "prisma generate",
     "seed": "tsx seed.ts"
   },
   "dependencies": {
