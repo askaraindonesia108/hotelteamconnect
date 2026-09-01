@@ -33,7 +33,7 @@ export default async function DevicesPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 text-sm">
-            {devices.map((d) => (
+            {devices.map((d: any) => (
               <tr key={d.id} className="hover:bg-slate-50/50">
                 <td className="py-3 px-4 font-medium text-slate-900">#{d.machineNumber}</td>
                 <td className="py-3 px-4 text-slate-900">{d.name}</td>
