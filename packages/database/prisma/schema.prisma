@@ -1,0 +1,181 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  HRD_ADMIN
+  DEPARTMENT_MANAGER
+  VIEWER
+}
+
+model Organization {
+  id               String             @id @default(uuid())
+  name             String
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  properties       Property[]
+  users            User[]
+  departments      Department[]
+  positions        Position[]
+  employmentStatus EmploymentStatus[]
+  employees        Employee[]
+  devices          Device[]
+  shifts           Shift[]
+  holidays         Holiday[]
+}
+
+model Property {
+  id               String             @id @default(uuid())
+  organizationId   String
+  organization     Organization       @relation(fields: [organizationId], references: [id])
+  name             String
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  users            User[]
+  departments      Department[]
+  positions        Position[]
+  employmentStatus EmploymentStatus[]
+  employees        Employee[]
+  devices          Device[]
+  shifts           Shift[]
+  holidays         Holiday[]
+}
+
+model User {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  propertyId     String
+  property       Property     @relation(fields: [propertyId], references: [id])
+  email          String       @unique
+  password       String
+  name           String
+  role           Role         @default(VIEWER)
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  action    String
+  entity    String
+  entityId  String?
+  details   Json?
+  ipAddress String?
+  createdAt DateTime @default(now())
+}
+
+// ==========================================
+// MASTER DATA HRD
+// ==========================================
+
+model Department {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  propertyId     String
+  property       Property     @relation(fields: [propertyId], references: [id])
+  name           String
+  code           String?
+  employees      Employee[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model Position {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  propertyId     String
+  property       Property     @relation(fields: [propertyId], references: [id])
+  name           String
+  employees      Employee[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model EmploymentStatus {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  propertyId     String
+  property       Property     @relation(fields: [propertyId], references: [id])
+  name           String       // cth: Tetap, Kontrak, Probation
+  employees      Employee[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model Employee {
+  id                 String           @id @default(uuid())
+  organizationId     String
+  organization       Organization     @relation(fields: [organizationId], references: [id])
+  propertyId         String
+  property           Property         @relation(fields: [propertyId], references: [id])
+  nip                String           // Nomor Induk Pegawai internal
+  machinePin         String?          // PIN di mesin Fingerspot
+  name               String
+  departmentId       String
+  department         Department       @relation(fields: [departmentId], references: [id])
+  positionId         String
+  position           Position         @relation(fields: [positionId], references: [id])
+  employmentStatusId String
+  employmentStatus   EmploymentStatus @relation(fields: [employmentStatusId], references: [id])
+  joinDate           DateTime         @db.Date
+  resignDate         DateTime?        @db.Date
+  contactInfo        String?
+  isActive           Boolean          @default(true)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+}
+
+model Device {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  propertyId     String
+  property       Property     @relation(fields: [propertyId], references: [id])
+  name           String       // cth: "mesin baru"
+  machineNumber  Int          // cth: 1
+  ipAddress      String?      // cth: 192.168.88.100
+  serialNumber   String?
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model Shift {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  propertyId     String
+  property       Property     @relation(fields: [propertyId], references: [id])
+  name           String       // cth: "Shift Pagi"
+  code           String
+  startTime      String       // Format HH:mm (cth: "08:00")
+  endTime        String       // Format HH:mm (cth: "16:00")
+  isNightShift   Boolean      @default(false)
+  gracePeriodMin Int          @default(0) // toleransi keterlambatan
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model Holiday {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  propertyId     String
+  property       Property     @relation(fields: [propertyId], references: [id])
+  name           String
+  date           DateTime     @db.Date
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}

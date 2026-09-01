@@ -1,0 +1,17 @@
+{
+  "name": "@team-connect/database",
+  "version": "1.0.0",
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "scripts": {
+    "seed": "tsx seed.ts"
+  },
+  "dependencies": {
+    "@node-rs/argon2": "^2.2.0",
+    "@prisma/client": "5.14.0"
+  },
+  "devDependencies": {
+    "prisma": "5.14.0",
+    "tsx": "^4.11.0"
+  }
+}
