@@ -49,6 +49,7 @@ export default async function DepartmentsPage() {
                 </tr>
               ) : (
                 departments.map((dept: any) => (
+                    
                   <tr key={dept.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="py-3 px-6 text-slate-900 font-medium">
                       {dept.name}
