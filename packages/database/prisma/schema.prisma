@@ -30,6 +30,8 @@ model Organization {
   holidays         Holiday[]
   rawScans         RawScan[]
   importJobs       ImportJob[]
+  attendanceRecords AttendanceRecord[]
+  leaveRequests    LeaveRequest[]
 }
 
 model Property {
@@ -49,6 +51,8 @@ model Property {
   holidays         Holiday[]
   rawScans         RawScan[]
   importJobs       ImportJob[]
+  attendanceRecords AttendanceRecord[]
+  leaveRequests    LeaveRequest[]
 }
 
 model User {
@@ -76,10 +80,6 @@ model AuditLog {
   ipAddress String?
   createdAt DateTime @default(now())
 }
-
-// ==========================================
-// MASTER DATA HRD
-// ==========================================
 
 model Department {
   id             String       @id @default(uuid())
@@ -139,6 +139,9 @@ model Employee {
   isActive           Boolean          @default(true)
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
+  
+  attendanceRecords  AttendanceRecord[]
+  leaveRequests      LeaveRequest[]
 }
 
 model Device {
@@ -184,18 +187,14 @@ model Holiday {
   updatedAt      DateTime     @updatedAt
 }
 
-// ==========================================
-// IMPORT & RAW SCANS LOG (IMMUTABLE)
-// ==========================================
-
 model ImportJob {
   id             String           @id @default(uuid())
   organizationId String
   organization   Organization     @relation(fields: [organizationId], references: [id])
   propertyId     String
   property       Property         @relation(fields: [propertyId], references: [id])
-  sourceType     String           // "CSV", "PERSONNEL_MYSQL"
-  status         String           // "PENDING", "RUNNING", "SUCCEEDED", "FAILED"
+  sourceType     String           
+  status         String           
   totalRead      Int              @default(0)
   totalValid     Int              @default(0)
   totalInvalid   Int              @default(0)
@@ -223,22 +222,72 @@ model RawScan {
   propertyId     String
   property       Property     @relation(fields: [propertyId], references: [id])
   
-  sourceType     String       // "CSV", "PERSONNEL_MYSQL"
-  sourceRecordId String       // ID/Hash dari sumber untuk mencegah duplikasi lintas retry
+  sourceType     String       
+  sourceRecordId String       
   
-  employeePin    String       // PIN Mesin
-  scannedAtUtc   DateTime     // Waktu scan absolut
+  employeePin    String       
+  scannedAtUtc   DateTime     
   
-  deviceId       String?      // Nomor/Nama Mesin (jika tersedia dari CSV/MySQL)
-  verifyMode     String?      // "1" (Finger), "4" (Face), dll
-  inOutState     String?      // Masuk/Keluar (jika didukung mesin)
+  deviceId       String?      
+  verifyMode     String?      
+  inOutState     String?      
   
-  rawMetadata    Json?        // Seluruh baris asli disensor (untuk audit/tracing)
-  createdAt      DateTime     @default(now()) // Waktu ditarik ke dalam sistem Team Connect
+  rawMetadata    Json?        
+  createdAt      DateTime     @default(now()) 
 
-  // Kunci gabungan agar 1 rekam jejak dari mesin tidak terimport dua kali walau di-retry
   @@unique([propertyId, sourceType, sourceRecordId])
-  
-  // Index untuk mempercepat kalkulasi absensi berdasarkan pegawai dan waktu
   @@index([propertyId, employeePin, scannedAtUtc])
+}
+
+// ==========================================
+// CALCULATED DATA (ATTENDANCE & LEAVES)
+// ==========================================
+
+model AttendanceRecord {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  propertyId     String
+  property       Property     @relation(fields: [propertyId], references: [id])
+  
+  employeeId     String
+  employee       Employee     @relation(fields: [employeeId], references: [id])
+  
+  date           DateTime     @db.Date
+  
+  checkIn        DateTime?
+  checkOut       DateTime?
+  
+  status         String       // "PRESENT", "ABSENT", "LEAVE", "DAY_OFF"
+  lateMinutes    Int          @default(0)
+  earlyMinutes   Int          @default(0)
+  
+  notes          String?
+  isManual       Boolean      @default(false) 
+  
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  // Mencegah duplikasi absensi pada hari yang sama untuk orang yang sama
+  @@unique([employeeId, date])
+}
+
+model LeaveRequest {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  propertyId     String
+  property       Property     @relation(fields: [propertyId], references: [id])
+  
+  employeeId     String
+  employee       Employee     @relation(fields: [employeeId], references: [id])
+  
+  type           String       // "SICK", "ANNUAL", "UNPAID", "PERMISSION"
+  startDate      DateTime     @db.Date
+  endDate        DateTime     @db.Date
+  reason         String?
+  status         String       // "PENDING", "APPROVED", "REJECTED"
+  
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 }
