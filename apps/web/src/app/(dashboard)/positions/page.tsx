@@ -46,7 +46,7 @@ export default async function PositionsPage() {
                   </td>
                 </tr>
               ) : (
-                positions.map((pos) => (
+                positions.map((pos: any) => (
                   <tr key={pos.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="py-3 px-6 text-slate-900 font-medium">
                       {pos.name}

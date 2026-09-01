@@ -74,7 +74,7 @@ export function CreateEmployeeForm({ departments, positions, statuses }: FormPro
           <label className="block text-sm font-medium text-slate-700 mb-1">Departemen <span className="text-red-500">*</span></label>
           <select name="departmentId" required className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 bg-white focus:ring-2 focus:ring-slate-900/20">
             <option value="">-- Pilih Departemen --</option>
-            {departments.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+            {departments.map((d: any) => <option key={d.id} value={d.id}>{d.name}</option>)}
           </select>
         </div>
 
@@ -82,7 +82,7 @@ export function CreateEmployeeForm({ departments, positions, statuses }: FormPro
           <label className="block text-sm font-medium text-slate-700 mb-1">Jabatan <span className="text-red-500">*</span></label>
           <select name="positionId" required className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 bg-white focus:ring-2 focus:ring-slate-900/20">
             <option value="">-- Pilih Jabatan --</option>
-            {positions.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+            {positions.map((p: any) => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
         </div>
 
@@ -90,7 +90,7 @@ export function CreateEmployeeForm({ departments, positions, statuses }: FormPro
           <label className="block text-sm font-medium text-slate-700 mb-1">Status Karyawan <span className="text-red-500">*</span></label>
           <select name="employmentStatusId" required className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 bg-white focus:ring-2 focus:ring-slate-900/20">
             <option value="">-- Pilih Status --</option>
-            {statuses.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+            {statuses.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         </div>
 

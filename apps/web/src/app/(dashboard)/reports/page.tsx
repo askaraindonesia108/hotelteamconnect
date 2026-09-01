@@ -93,7 +93,7 @@ export default async function ReportsPage({
                   </td>
                 </tr>
               ) : (
-                records.map((rec) => (
+                records.map((rec: any) => (
                   <tr key={rec.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="py-3 px-4">
                       <div className="font-medium text-slate-900">{rec.employee.name}</div>

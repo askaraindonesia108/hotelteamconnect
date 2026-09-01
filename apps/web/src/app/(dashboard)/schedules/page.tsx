@@ -34,7 +34,7 @@ export default async function SchedulesPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 text-sm">
-            {shifts.map((s) => (
+            {shifts.map((s: any) => (
               <tr key={s.id} className="hover:bg-slate-50/50">
                 <td className="py-3 px-4 font-medium text-slate-900">{s.code}</td>
                 <td className="py-3 px-4 text-slate-600">{s.name}</td>

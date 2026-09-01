@@ -51,7 +51,7 @@ export default async function LeavesPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 text-sm">
-            {leaves.map((l) => (
+            {leaves.map((l: any) => (
               <tr key={l.id} className="hover:bg-slate-50/50">
                 <td className="py-3 px-4">
                   <div className="font-medium text-slate-900">{l.employee.name}</div>

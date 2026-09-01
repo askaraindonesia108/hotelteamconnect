@@ -75,7 +75,7 @@ export default async function RawScansPage() {
                   </td>
                 </tr>
               ) : (
-                rawScans.map((scan) => {
+                rawScans.map((scan: any) => {
                   const emp = employeeMap.get(scan.employeePin);
                   
                   return (

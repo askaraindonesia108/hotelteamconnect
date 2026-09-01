@@ -174,7 +174,7 @@ export function CsvWizard() {
                 <div>
                   <h4 className="font-medium text-slate-800 mb-3 flex items-center gap-2"><FileText className="w-4 h-4 text-slate-500" /> Pratinjau (3 Baris)</h4>
                   <div className="overflow-x-auto border border-slate-200 rounded-lg">
-                    <table className="w-full text-left text-sm"><thead className="bg-slate-50 border-b border-slate-200"><tr>{headers.map((h, i) => <th key={i} className="py-2 px-3 font-semibold text-slate-600 whitespace-nowrap">{h}</th>)}</tr></thead><tbody className="divide-y divide-slate-100">{previewData.map((row, rowIndex) => <tr key={rowIndex}>{headers.map((h, colIndex) => <td key={colIndex} className="py-2 px-3 text-slate-600 whitespace-nowrap">{row[h] || '-'}</td>)}</tr>)}</tbody></table>
+                    <table className="w-full text-left text-sm"><thead className="bg-slate-50 border-b border-slate-200"><tr>{headers.map((h: any, i: number) => <th key={i} className="py-2 px-3 font-semibold text-slate-600 whitespace-nowrap">{h}</th>)}</tr></thead><tbody className="divide-y divide-slate-100">{previewData.map((row: any, rowIndex: number) => <tr key={rowIndex}>{headers.map((h: any, colIndex: number) => <td key={colIndex} className="py-2 px-3 text-slate-600 whitespace-nowrap">{row[h] || '-'}</td>)}</tr>)}</tbody></table>
                   </div>
                 </div>
                 <div>

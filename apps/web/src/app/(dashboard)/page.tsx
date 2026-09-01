@@ -56,7 +56,7 @@ export default async function DashboardPage() {
   ]);
 
   // Siapkan referensi array 7 hari terakhir untuk sumbu X grafik
-  const last7DaysStr = Array.from({ length: 7 }).map((_, i) => {
+  const last7DaysStr = Array.from({ length: 7 }).map((_: any, i: number) => {
     return format(subDays(today, 6 - i), 'dd MMM', { locale: localeID });
   });
 

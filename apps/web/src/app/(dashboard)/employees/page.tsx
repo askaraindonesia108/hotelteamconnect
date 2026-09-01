@@ -70,7 +70,7 @@ export default async function EmployeesPage() {
                   </td>
                 </tr>
               ) : (
-                employees.map((emp) => (
+                employees.map((emp: any) => (
                   <tr key={emp.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="py-3 px-4">
                       <div className="font-medium text-slate-900">{emp.nip}</div>
