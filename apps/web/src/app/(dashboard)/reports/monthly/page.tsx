@@ -7,7 +7,7 @@ import { id as localeID } from 'date-fns/locale';
 import Link from 'next/link';
 import { ArrowLeft, FileSpreadsheet } from 'lucide-react';
 
-export const metadata = { title: 'Rekap Bulanan | Hotel Team Connect' };
+export const metadata = { title: 'Rekap Bulanan | eL Hotel Malang' };
 
 export default async function MonthlyReportPage({
   searchParams,
@@ -111,7 +111,7 @@ export default async function MonthlyReportPage({
                   </td>
                 </tr>
               ) : (
-                reportData.map((data: any) => (
+                reportData.map((data) => (
                   <tr key={data.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="py-3 px-4">
                       <div className="font-medium text-slate-900">{data.name}</div>

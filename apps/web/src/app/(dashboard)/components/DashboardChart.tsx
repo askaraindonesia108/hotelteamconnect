@@ -50,7 +50,7 @@ export function InteractiveHRChart({ attendances, departments, last7Days }: HRCh
 
     // 2. Kelompokkan berdasarkan tanggal
     const groupedByDate: Record<string, typeof filtered> = {};
-    filtered.forEach(record => {
+    filtered.forEach((record: any) => {
       if (!groupedByDate[record.date]) groupedByDate[record.date] = [];
       groupedByDate[record.date].push(record);
     });
@@ -65,7 +65,7 @@ export function InteractiveHRChart({ attendances, departments, last7Days }: HRCh
       let totalWorkHours = 0;
       let validWorkHours = 0;
 
-      dayRecords.forEach(rec => {
+      dayRecords.forEach(rec=> {
         if (rec.checkIn) {
           // Konversi jam ke desimal (contoh: 07:30 = 7.5)
           const checkInDate = new Date(rec.checkIn);
