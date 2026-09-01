@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import { CreateDepartmentForm, DeleteButton } from './components/ClientComponents';
 
 export const metadata = {
-  title: 'Departemen | eL Hotel Malang',
+  title: 'Departemen | Hotel Team Connect',
 };
 
 export default async function DepartmentsPage() {

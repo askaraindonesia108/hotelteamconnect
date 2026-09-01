@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import { CreatePositionForm, DeleteButton } from './components/ClientComponents';
 
 export const metadata = {
-  title: 'Jabatan | eL Hotel Malang',
+  title: 'Jabatan | Hotel Team Connect',
 };
 
 export default async function PositionsPage() {

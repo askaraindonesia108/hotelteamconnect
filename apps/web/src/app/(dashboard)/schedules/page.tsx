@@ -3,7 +3,7 @@ import { prisma } from '@team-connect/database';
 import { redirect } from 'next/navigation';
 import { CreateShiftForm, DeleteButton } from './components/ClientComponents';
 
-export const metadata = { title: 'Shift & Jadwal | eL Hotel Malang' };
+export const metadata = { title: 'Shift & Jadwal | Hotel Team Connect' };
 
 export default async function SchedulesPage() {
   const session = await auth();

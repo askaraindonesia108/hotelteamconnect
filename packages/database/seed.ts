@@ -20,7 +20,7 @@ async function main() {
       name: 'eL Hotel',
       properties: {
         create: {
-          name: 'eL Hotel Malang',
+          name: 'Hotel Team Connect',
         },
       },
     },

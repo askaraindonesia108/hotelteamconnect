@@ -3,7 +3,7 @@ import { prisma } from '@team-connect/database';
 import { redirect } from 'next/navigation';
 import { CreateEmployeeForm, DeleteButton } from './components/ClientComponents';
 
-export const metadata = { title: 'Pegawai | eL Hotel Malang' };
+export const metadata = { title: 'Pegawai | Hotel Team Connect' };
 
 export default async function EmployeesPage() {
   const session = await auth();

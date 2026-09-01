@@ -2,7 +2,7 @@ import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { CsvWizard } from './components/CsvWizard';
 
-export const metadata = { title: 'Import Center | eL Hotel Malang' };
+export const metadata = { title: 'Import Center | Hotel Team Connect' };
 
 export default async function ImportCenterPage() {
   const session = await auth();

@@ -36,7 +36,7 @@ export default function LoginPage() {
           <div className="bg-white/10 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
             <Hotel className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-white mb-1">eL Hotel Malang</h1>
+          <h1 className="text-2xl font-bold text-white mb-1">Hotel Team Connect</h1>
           <p className="text-red-100 text-sm">Team Connect - HRD Management</p>
         </div>
 

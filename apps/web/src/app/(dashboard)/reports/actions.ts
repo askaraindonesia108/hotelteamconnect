@@ -12,12 +12,11 @@ export async function generateDailyAttendance(dateStr: string) {
 
     const { propertyId, organizationId } = session.user;
     
-    // 1. Rentang waktu lokal untuk mencari Raw Scan (WIB)
     const targetDate = parseISO(dateStr);
     const startLocal = startOfDay(targetDate);
     const endLocal = endOfDay(targetDate);
 
-    // 2. Format tanggal absolut UTC untuk Prisma @db.Date agar tidak bergeser hari
+    // Format tanggal absolut untuk database
     const recordDate = new Date(`${dateStr}T00:00:00.000Z`);
 
     const employees = await prisma.employee.findMany({
@@ -27,6 +26,7 @@ export async function generateDailyAttendance(dateStr: string) {
 
     let presentCount = 0;
     let absentCount = 0;
+    let leaveCount = 0; // Tambahan metrik baru
 
     for (const emp of employees) {
       if (!emp.machinePin) {
@@ -34,6 +34,7 @@ export async function generateDailyAttendance(dateStr: string) {
         continue;
       }
 
+      // 1. Cek log mesin absensi
       const scans = await prisma.rawScan.findMany({
         where: {
           propertyId,
@@ -46,6 +47,7 @@ export async function generateDailyAttendance(dateStr: string) {
       let status = 'ABSENT';
       let checkIn = null;
       let checkOut = null;
+      let notes = null;
 
       if (scans.length > 0) {
         status = 'PRESENT';
@@ -53,7 +55,23 @@ export async function generateDailyAttendance(dateStr: string) {
         checkOut = scans[scans.length - 1].scannedAtUtc; 
         presentCount++;
       } else {
-        absentCount++;
+        // 2. SINERGI CUTI: Jika tidak ada absen mesin, cek tabel cuti/izin
+        const leave = await prisma.leaveRequest.findFirst({
+          where: {
+            employeeId: emp.id,
+            startDate: { lte: recordDate },
+            endDate: { gte: recordDate },
+            status: 'APPROVED'
+          }
+        });
+
+        if (leave) {
+          status = leave.type; // Timpa dengan SICK, ANNUAL, PERMISSION, dll
+          notes = leave.reason;
+          leaveCount++;
+        } else {
+          absentCount++;
+        }
       }
 
       await prisma.attendanceRecord.upsert({
@@ -64,6 +82,7 @@ export async function generateDailyAttendance(dateStr: string) {
           checkIn,
           checkOut,
           status,
+          notes, // Simpan keterangan cuti
           updatedAt: new Date()
         },
         create: {
@@ -73,13 +92,17 @@ export async function generateDailyAttendance(dateStr: string) {
           date: recordDate,
           checkIn,
           checkOut,
-          status
+          status,
+          notes
         }
       });
     }
 
     revalidatePath('/reports');
-    return { success: true, message: `Berhasil mengkalkulasi absensi: ${presentCount} Hadir, ${absentCount} Alpa/Libur.` };
+    return { 
+      success: true, 
+      message: `Kalkulasi Selesai: ${presentCount} Hadir, ${leaveCount} Izin/Cuti, ${absentCount} Alpa.` 
+    };
 
   } catch (error) {
     console.error('Attendance Calculation Error:', error);

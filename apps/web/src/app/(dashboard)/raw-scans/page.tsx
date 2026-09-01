@@ -3,7 +3,7 @@ import { prisma } from '@team-connect/database';
 import { redirect } from 'next/navigation';
 import { Fingerprint, AlertCircle } from 'lucide-react';
 
-export const metadata = { title: 'Log Absen Mentah | eL Hotel Malang' };
+export const metadata = { title: 'Log Absen Mentah | Hotel Team Connect' };
 
 export default async function RawScansPage() {
   const session = await auth();

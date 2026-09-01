@@ -5,7 +5,7 @@ import { CreateLeaveForm, DeleteButton } from './components/ClientComponents';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 
-export const metadata = { title: 'Cuti & Izin | eL Hotel Malang' };
+export const metadata = { title: 'Cuti & Izin | Hotel Team Connect' };
 
 const typeMap: Record<string, { label: string, color: string }> = {
   SICK: { label: 'Sakit', color: 'bg-red-100 text-red-700' },

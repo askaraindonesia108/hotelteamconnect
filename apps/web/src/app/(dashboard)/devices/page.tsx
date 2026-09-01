@@ -3,7 +3,7 @@ import { prisma } from '@team-connect/database';
 import { redirect } from 'next/navigation';
 import { CreateDeviceForm, DeleteButton } from './components/ClientComponents';
 
-export const metadata = { title: 'Mesin & Sumber | eL Hotel Malang' };
+export const metadata = { title: 'Mesin & Sumber | Hotel Team Connect' };
 
 export default async function DevicesPage() {
   const session = await auth();

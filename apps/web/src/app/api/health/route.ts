@@ -7,7 +7,7 @@ export async function GET() {
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV || 'development',
       version: '1.0.0',
-      app: 'eL Hotel Malang - Team Connect'
+      app: 'Hotel Team Connect - Team Connect'
     },
     { status: 200 }
   );
