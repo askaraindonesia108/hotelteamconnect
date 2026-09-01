@@ -28,6 +28,8 @@ model Organization {
   devices          Device[]
   shifts           Shift[]
   holidays         Holiday[]
+  rawScans         RawScan[]
+  importJobs       ImportJob[]
 }
 
 model Property {
@@ -45,6 +47,8 @@ model Property {
   devices          Device[]
   shifts           Shift[]
   holidays         Holiday[]
+  rawScans         RawScan[]
+  importJobs       ImportJob[]
 }
 
 model User {
@@ -108,7 +112,7 @@ model EmploymentStatus {
   organization   Organization @relation(fields: [organizationId], references: [id])
   propertyId     String
   property       Property     @relation(fields: [propertyId], references: [id])
-  name           String       // cth: Tetap, Kontrak, Probation
+  name           String       
   employees      Employee[]
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
@@ -120,8 +124,8 @@ model Employee {
   organization       Organization     @relation(fields: [organizationId], references: [id])
   propertyId         String
   property           Property         @relation(fields: [propertyId], references: [id])
-  nip                String           // Nomor Induk Pegawai internal
-  machinePin         String?          // PIN di mesin Fingerspot
+  nip                String           
+  machinePin         String?          
   name               String
   departmentId       String
   department         Department       @relation(fields: [departmentId], references: [id])
@@ -143,9 +147,9 @@ model Device {
   organization   Organization @relation(fields: [organizationId], references: [id])
   propertyId     String
   property       Property     @relation(fields: [propertyId], references: [id])
-  name           String       // cth: "mesin baru"
-  machineNumber  Int          // cth: 1
-  ipAddress      String?      // cth: 192.168.88.100
+  name           String       
+  machineNumber  Int          
+  ipAddress      String?      
   serialNumber   String?
   isActive       Boolean      @default(true)
   createdAt      DateTime     @default(now())
@@ -158,12 +162,12 @@ model Shift {
   organization   Organization @relation(fields: [organizationId], references: [id])
   propertyId     String
   property       Property     @relation(fields: [propertyId], references: [id])
-  name           String       // cth: "Shift Pagi"
+  name           String       
   code           String
-  startTime      String       // Format HH:mm (cth: "08:00")
-  endTime        String       // Format HH:mm (cth: "16:00")
+  startTime      String       
+  endTime        String       
   isNightShift   Boolean      @default(false)
-  gracePeriodMin Int          @default(0) // toleransi keterlambatan
+  gracePeriodMin Int          @default(0) 
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 }
@@ -178,4 +182,63 @@ model Holiday {
   date           DateTime     @db.Date
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
+}
+
+// ==========================================
+// IMPORT & RAW SCANS LOG (IMMUTABLE)
+// ==========================================
+
+model ImportJob {
+  id             String           @id @default(uuid())
+  organizationId String
+  organization   Organization     @relation(fields: [organizationId], references: [id])
+  propertyId     String
+  property       Property         @relation(fields: [propertyId], references: [id])
+  sourceType     String           // "CSV", "PERSONNEL_MYSQL"
+  status         String           // "PENDING", "RUNNING", "SUCCEEDED", "FAILED"
+  totalRead      Int              @default(0)
+  totalValid     Int              @default(0)
+  totalInvalid   Int              @default(0)
+  totalDuplicate Int              @default(0)
+  totalInserted  Int              @default(0)
+  errorMessage   String?          @db.Text
+  startedAt      DateTime         @default(now())
+  finishedAt     DateTime?
+  errors         ImportRowError[]
+}
+
+model ImportRowError {
+  id           String    @id @default(uuid())
+  importJobId  String
+  importJob    ImportJob @relation(fields: [importJobId], references: [id], onDelete: Cascade)
+  rowNumber    Int
+  rawData      String?   @db.Text
+  errorMessage String
+}
+
+model RawScan {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  propertyId     String
+  property       Property     @relation(fields: [propertyId], references: [id])
+  
+  sourceType     String       // "CSV", "PERSONNEL_MYSQL"
+  sourceRecordId String       // ID/Hash dari sumber untuk mencegah duplikasi lintas retry
+  
+  employeePin    String       // PIN Mesin
+  scannedAtUtc   DateTime     // Waktu scan absolut
+  
+  deviceId       String?      // Nomor/Nama Mesin (jika tersedia dari CSV/MySQL)
+  verifyMode     String?      // "1" (Finger), "4" (Face), dll
+  inOutState     String?      // Masuk/Keluar (jika didukung mesin)
+  
+  rawMetadata    Json?        // Seluruh baris asli disensor (untuk audit/tracing)
+  createdAt      DateTime     @default(now()) // Waktu ditarik ke dalam sistem Team Connect
+
+  // Kunci gabungan agar 1 rekam jejak dari mesin tidak terimport dua kali walau di-retry
+  @@unique([propertyId, sourceType, sourceRecordId])
+  
+  // Index untuk mempercepat kalkulasi absensi berdasarkan pegawai dan waktu
+  @@index([propertyId, employeePin, scannedAtUtc])
 }
