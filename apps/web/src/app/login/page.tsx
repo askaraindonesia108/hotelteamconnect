@@ -1,8 +1,8 @@
 'use client';
 
 import { useFormStatus } from 'react-dom';
-import { loginAction } from './actions';
-import { Hotel, KeyRound, Mail } from 'lucide-react';
+import { loginAction } from './actions'; // Pastikan nama import sesuai dengan nama file action Anda
+import { Hotel, KeyRound, Mail, AlertCircle } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 
@@ -25,10 +25,16 @@ function LoginForm() {
   const errorParam = searchParams.get('error');
 
   let errorMessage = '';
+  let isWarning = false; // Penanda untuk mengubah warna UI menjadi kuning (peringatan) bukan merah (bahaya)
+
+  // Logika pembacaan URL Parameter
   if (errorParam === 'kredensial-kosong') {
     errorMessage = 'Email dan password tidak boleh kosong.';
   } else if (errorParam === 'kredensial-salah') {
     errorMessage = 'Email atau password salah. Silakan coba lagi.';
+  } else if (errorParam === 'sesi-berakhir') {
+    errorMessage = 'Sesi Anda telah berakhir. Silakan login kembali.';
+    isWarning = true; // Jadikan peringatan kuning
   } else if (errorParam) {
     errorMessage = 'Terjadi kesalahan sistem saat login.';
   }
@@ -71,9 +77,18 @@ function LoginForm() {
         </div>
       </div>
 
+      {/* Tampilan Error / Peringatan Dinamis */}
       {errorMessage && (
-        <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100 flex items-center gap-2">
-          <div className="w-1.5 h-1.5 rounded-full bg-red-600 flex-shrink-0"></div>
+        <div className={`p-3 text-sm rounded-lg border flex items-center gap-2 ${
+          isWarning 
+            ? 'bg-amber-50 text-amber-700 border-amber-200' 
+            : 'bg-red-50 text-red-600 border-red-100'
+        }`}>
+          {isWarning ? (
+             <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0" />
+          ) : (
+             <div className="w-1.5 h-1.5 rounded-full bg-red-600 flex-shrink-0"></div>
+          )}
           {errorMessage}
         </div>
       )}

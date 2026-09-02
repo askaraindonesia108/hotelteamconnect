@@ -3,7 +3,7 @@ const { exec } = require('child_process');
 const ZKLib = require('node-zklib');
 const fs = require('fs');
 const path = require('path');
-const axios = require('axios'); // <-- Ditambahkan Axios
+const axios = require('axios');
 
 const app = express();
 app.use(express.json());
@@ -35,14 +35,19 @@ app.post('/api/logout', (req, res) => {
   res.json({ success: true });
 });
 
-// PROXY LOGIN: Menggunakan Axios yang stabil
+// PROXY LOGIN: Menggunakan Axios + Error Handler Mendalam
 app.post('/api/login', async (req, res) => {
   try {
     const response = await axios.post(VERCEL_API_AUTH, req.body);
     res.json(response.data);
   } catch (error) {
-    // Menangkap pesan asli dari Vercel (misal: Salah password, atau Error 404/500)
-    const msg = error.response ? (error.response.data.error || `Server Vercel Error (${error.response.status})`) : error.message;
+    let msg = error.message;
+    if (error.response && error.response.data) {
+       msg = typeof error.response.data === 'object' 
+         ? (error.response.data.error || JSON.stringify(error.response.data)) 
+         : error.response.data;
+    }
+    console.error('❌ LOGIN ERROR:', msg);
     res.status(500).json({ error: `Gagal: ${msg}` });
   }
 });
@@ -55,13 +60,16 @@ app.post('/api/sync', async (req, res) => {
   let zkInstance = new ZKLib(config.machineIp, config.machinePort, 10000, 4000);
 
   try {
+    console.log(`⏳ Menghubungkan ke mesin absen di ${config.machineIp}:${config.machinePort}...`);
     await zkInstance.createSocket();
     await zkInstance.connect();
+    console.log(`✅ Berhasil terhubung ke mesin absen!`);
 
     if (type === 'employees') {
       const users = await zkInstance.getUsers();
-      if (users.data.length === 0) throw new Error('Tidak ada data pegawai di mesin.');
+      if (!users.data || users.data.length === 0) throw new Error('Tidak ada data pegawai di dalam mesin absensi.');
       
+      console.log(`📡 Menarik ${users.data.length} data pegawai, mengirim ke Vercel...`);
       const payload = {
         organizationId: config.organizationId,
         propertyId: config.propertyId,
@@ -75,8 +83,9 @@ app.post('/api/sync', async (req, res) => {
       
     } else {
       const logs = await zkInstance.getAttendances();
-      if (logs.data.length === 0) throw new Error('Tidak ada log absensi baru.');
+      if (!logs.data || logs.data.length === 0) throw new Error('Tidak ada log absensi baru di dalam mesin.');
       
+      console.log(`📡 Menarik ${logs.data.length} log absensi, mengirim ke Vercel...`);
       const payload = {
         organizationId: config.organizationId,
         propertyId: config.propertyId,
@@ -89,10 +98,36 @@ app.post('/api/sync', async (req, res) => {
       res.json({ message: response.data.message });
     }
   } catch (e) {
-    const errorMsg = e.response ? (e.response.data.error || `HTTP ${e.response.status}`) : e.message;
+    let errorMsg = 'Terjadi kesalahan tidak terduga.';
+    
+    // 1. Tangkap error dari Vercel/Next.js
+    if (e.response && e.response.data) {
+       errorMsg = typeof e.response.data === 'object' 
+           ? (e.response.data.error || JSON.stringify(e.response.data)) 
+           : e.response.data;
+    } 
+    // 2. Tangkap error gagal konek TCP ke mesin ZKTeco (timeout)
+    else if (e.code) {
+       if (e.code === 'ECONNREFUSED' || e.code === 'ETIMEDOUT') {
+           errorMsg = `Gagal terhubung ke mesin di IP ${config.machineIp}. Pastikan mesin menyala, kabel LAN terhubung, dan berada di satu jaringan.`;
+       } else {
+           errorMsg = `Network Error: ${e.message || e.code}`;
+       }
+    } 
+    // 3. Tangkap error logic umum
+    else {
+       errorMsg = typeof e === 'object' && e !== null ? (e.message || JSON.stringify(e)) : String(e);
+    }
+    
+    console.error('\n❌ DETAIL ERROR:', errorMsg, '\n');
     res.status(500).json({ error: errorMsg });
   } finally {
-    await zkInstance.disconnect();
+    try {
+      await zkInstance.disconnect();
+      console.log('🔌 Koneksi ke mesin diputus secara aman.');
+    } catch(err) {
+      // Abaikan error saat disconnect
+    }
   }
 });
 
