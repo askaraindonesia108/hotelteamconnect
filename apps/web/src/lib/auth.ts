@@ -14,9 +14,7 @@ export async function auth() {
       where: { email: user.email },
     });
 
-    // SISTEM AUTO-SEED: Jika user belum terdaftar, buatkan otomatis
     if (!dbUser) {
-      // 1. Cek atau buat Organisasi baru
       let org = await prisma.organization.findFirst();
       if (!org) {
         org = await prisma.organization.create({
@@ -24,7 +22,6 @@ export async function auth() {
         });
       }
 
-      // 2. Cek atau buat Properti baru
       let prop = await prisma.property.findFirst({
         where: { organizationId: org.id }
       });
@@ -34,11 +31,10 @@ export async function auth() {
         });
       }
 
-      // 3. Daftarkan User ini sebagai Admin Utama
       dbUser = await prisma.user.create({
         data: {
           email: user.email,
-          name: 'Admin HRD', // Anda bisa mengedit nama ini nanti
+          name: 'Askara (Admin)', 
           password: 'auto-generated', 
           role: 'HRD_ADMIN',
           organizationId: org.id,
@@ -47,7 +43,6 @@ export async function auth() {
       });
     }
 
-    // Kembalikan data user yang valid dengan ID yang sah
     return {
       user: {
         id: dbUser.id,
@@ -59,14 +54,17 @@ export async function auth() {
       }
     };
 
-  } catch (error) {
-    console.error("PRISMA ERROR DI VERCEL:", error);
+  } catch (error: any) {
+    // DIAGNOSTIK: Menarik akar pesan error Prisma dan memasukkannya ke UI
+    const rawError = error?.message || String(error);
+    const cleanError = rawError.split('\n').filter(Boolean).pop()?.trim() || rawError;
+    
     return {
       user: {
         id: user.id,
         email: user.email,
-        name: 'ERROR KONEKSI VERCEL',
-        role: 'ADMIN',
+        name: `Info: ${cleanError}`.substring(0, 35),
+        role: 'BACA ERROR DI ATAS',
         propertyId: 'error-property',
         organizationId: 'error-org',
       }
