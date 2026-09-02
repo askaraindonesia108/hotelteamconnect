@@ -10,23 +10,44 @@ export async function auth() {
   }
 
   try {
-    const dbUser = await prisma.user.findUnique({
+    let dbUser = await prisma.user.findUnique({
       where: { email: user.email },
     });
 
+    // SISTEM AUTO-SEED: Jika user belum terdaftar, buatkan otomatis
     if (!dbUser) {
-      return {
-        user: {
-          id: user.id,
+      // 1. Cek atau buat Organisasi baru
+      let org = await prisma.organization.findFirst();
+      if (!org) {
+        org = await prisma.organization.create({
+          data: { name: 'eL Hotel Group' }
+        });
+      }
+
+      // 2. Cek atau buat Properti baru
+      let prop = await prisma.property.findFirst({
+        where: { organizationId: org.id }
+      });
+      if (!prop) {
+        prop = await prisma.property.create({
+          data: { name: 'eL Hotel Malang', organizationId: org.id }
+        });
+      }
+
+      // 3. Daftarkan User ini sebagai Admin Utama
+      dbUser = await prisma.user.create({
+        data: {
           email: user.email,
-          name: 'Admin (Data Belum Ada)',
-          role: 'ADMIN',
-          propertyId: 'dummy-property',
-          organizationId: 'dummy-org',
+          name: 'Admin HRD', // Anda bisa mengedit nama ini nanti
+          password: 'auto-generated', 
+          role: 'HRD_ADMIN',
+          organizationId: org.id,
+          propertyId: prop.id,
         }
-      };
+      });
     }
 
+    // Kembalikan data user yang valid dengan ID yang sah
     return {
       user: {
         id: dbUser.id,
