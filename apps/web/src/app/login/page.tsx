@@ -20,12 +20,10 @@ function SubmitButton() {
   );
 }
 
-// Komponen form dipisah agar bisa membaca URL Parameter dengan aman
 function LoginForm() {
   const searchParams = useSearchParams();
   const errorParam = searchParams.get('error');
 
-  // Terjemahkan kode error dari URL menjadi pesan bahasa Indonesia
   let errorMessage = '';
   if (errorParam === 'kredensial-kosong') {
     errorMessage = 'Email dan password tidak boleh kosong.';
@@ -91,8 +89,6 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100">
-        
-        {/* Header Section */}
         <div className="bg-red-700 p-8 text-center">
           <div className="bg-white/10 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
             <Hotel className="w-8 h-8 text-white" />
@@ -100,15 +96,11 @@ export default function LoginPage() {
           <h1 className="text-2xl font-bold text-white mb-1">Hotel Team Connect</h1>
           <p className="text-red-100 text-sm">Team Connect - HRD Management</p>
         </div>
-
-        {/* Form Section */}
         <div className="p-8">
-          {/* Suspense wajib digunakan saat memanggil useSearchParams di Next.js */}
           <Suspense fallback={<div className="text-center text-sm text-slate-500 py-4">Memuat form...</div>}>
             <LoginForm />
           </Suspense>
         </div>
-        
       </div>
     </div>
   );
