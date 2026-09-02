@@ -4,7 +4,12 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   experimental: {
-    serverComponentsExternalPackages: ['node-zklib', '@node-rs/argon2'],
+    serverComponentsExternalPackages: [
+      'node-zklib',
+      '@node-rs/argon2',
+      '@prisma/client',
+      '@team-connect/database'
+    ],
   },
 };
 
