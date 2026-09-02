@@ -3,33 +3,39 @@
 import { createClient } from '@/lib/supabase';
 import { redirect } from 'next/navigation';
 
-export async function loginAction(formData: FormData) {
-  const email = formData.get('email') as string;
-  const password = formData.get('password') as string;
-  
+export async function loginAction(data: FormData | any) {
+  let email = '';
+  let password = '';
+
+  // Aman membaca data baik dikirim via FormData maupun objek biasa
+  if (data && typeof data.get === 'function') {
+    email = data.get('email') as string;
+    password = data.get('password') as string;
+  } else if (data && typeof data === 'object') {
+    email = data.email || '';
+    password = data.password || '';
+  }
+
+  if (!email || !password) {
+    redirect('/login?error=kredensial-kosong');
+  }
+
   const supabase = createClient();
-  
+
   const { error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
 
   if (error) {
-    // Alih-alih melempar error yang membuat layar putih (crash/Error 500), 
-    // kita kembalikan pengguna ke halaman login dan berikan penanda error di URL
     redirect('/login?error=kredensial-salah');
   }
 
-  // Jika sukses login di Supabase, arahkan langsung ke halaman utama (dashboard)
   redirect('/');
 }
 
 export async function logoutAction() {
   const supabase = createClient();
-  
-  // Hapus sesi aktif dari Supabase
   await supabase.auth.signOut();
-  
-  // Arahkan kembali ke halaman login
   redirect('/login');
 }
